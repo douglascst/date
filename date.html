@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenho uma pergunta pra você 💌</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rosa: #ff6b9d;
+    --rosa-claro: #ffc4d8;
+    --pessego: #ffd5a8;
+    --creme: #fff8ee;
+    --vinho: #c2185b;
+    --amarelo: #ffd93d;
+    --lilas: #c5a3ff;
+    --texto: #4a1d3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Fraunces', Georgia, serif;
+    color: var(--texto);
+    background: linear-gradient(135deg, #ffc4d8 0%, #ffd5a8 50%, #ffe5b4 100%);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,107,157,0.15) 0%, transparent 8%),
+      radial-gradient(circle at 80% 80%, rgba(197,163,255,0.2) 0%, transparent 10%),
+      radial-gradient(circle at 60% 30%, rgba(255,217,61,0.15) 0%, transparent 7%),
+      radial-gradient(circle at 30% 70%, rgba(255,107,157,0.12) 0%, transparent 9%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .tela {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .tela.ativa {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .titulo {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    color: var(--vinho);
+    text-align: center;
+    margin-bottom: 10px;
+    transform: rotate(-2deg);
+    text-shadow: 3px 3px 0 rgba(255,255,255,0.5);
+  }
+
+  .subtitulo {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    text-align: center;
+    margin-bottom: 30px;
+    max-width: 600px;
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--texto);
+  }
+
+  .pergunta {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--vinho);
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .botoes {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+  }
+
+  .btn {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    padding: 18px 50px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 10px 20px rgba(255,107,157,0.3);
+  }
+
+  .btn-sim {
+    background: var(--rosa);
+    color: white;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+  }
+  .btn-sim:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 9px 0 rgba(0,0,0,0.15), 0 15px 30px rgba(255,107,157,0.5);
+  }
+
+  .btn-nao {
+    background: white;
+    color: var(--texto);
+    position: relative;
+    transition: top 0.25s ease, left 0.25s ease, transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .tentativas {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Caveat', cursive;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    color: var(--vinho);
+    opacity: 0;
+    transition: opacity 0.4s;
+    text-align: center;
+    padding: 0 20px;
+    pointer-events: none;
+    z-index: 5;
+    max-width: 90vw;
+  }
+  .tentativas.aparece { opacity: 0.85; }
+
+  .coracao {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    animation: subir 4s linear forwards;
+    z-index: 10;
+  }
+  @keyframes subir {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* TELA 2 - Escolhas */
+  .escolhas-titulo {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: var(--vinho);
+    margin-bottom: 10px;
+    text-align: center;
+    transform: rotate(-1deg);
+  }
+  .escolhas-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    margin-bottom: 40px;
+    font-style: italic;
+    text-align: center;
+  }
+
+  .opcoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .opcao {
+    background: white;
+    border-radius: 25px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 3px solid transparent;
+    box-shadow: 0 8px 20px rgba(194,24,91,0.15);
+  }
+  .opcao:hover {
+    transform: translateY(-8px) rotate(-1deg);
+    border-color: var(--rosa);
+    box-shadow: 0 15px 30px rgba(255,107,157,0.3);
+  }
+  .opcao.selecionada {
+    background: var(--rosa);
+    color: white;
+    border-color: var(--vinho);
+    transform: scale(1.05);
+  }
+  .opcao-emoji {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .opcao-titulo {
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    color: var(--vinho);
+    margin-bottom: 5px;
+  }
+  .opcao.selecionada .opcao-titulo { color: white; }
+  .opcao-desc {
+    font-size: 0.95rem;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .btn-confirmar {
+    margin-top: 30px;
+    background: var(--vinho);
+    color: white;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 0.3s;
+  }
+  .btn-confirmar.habilitado {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .btn-confirmar.habilitado:hover {
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  /* TELA FINAL */
+  .final {
+    text-align: center;
+    max-width: 700px;
+  }
+  .final-titulo {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(3rem, 8vw, 6rem);
+    color: var(--vinho);
+    line-height: 1;
+    margin-bottom: 20px;
+    transform: rotate(-2deg);
+    text-shadow: 4px 4px 0 white;
+  }
+  .final-arte {
+    font-size: clamp(5rem, 15vw, 9rem);
+    margin: 20px 0;
+    animation: bater 1.5s ease-in-out infinite;
+  }
+  @keyframes bater {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .final-msg {
+    background: white;
+    padding: 30px;
+    border-radius: 30px;
+    font-size: clamp(1rem, 2.2vw, 1.3rem);
+    line-height: 1.6;
+    box-shadow: 0 15px 40px rgba(194,24,91,0.25);
+    border: 3px dashed var(--rosa);
+    font-style: italic;
+  }
+  .assinatura {
+    margin-top: 25px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.8rem;
+    color: var(--vinho);
+    transform: rotate(-3deg);
+    display: inline-block;
+  }
+
+  .confete {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 100;
+    animation: cair 3s linear forwards;
+  }
+  @keyframes cair {
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .btn { padding: 15px 35px; }
+    .botoes { gap: 15px; }
+    html, body { overflow-y: auto; }
+    .tela { position: relative; min-height: 100vh; }
+    .tela:not(.ativa) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TELA 1: Pergunta inicial -->
+<div class="tela ativa" id="tela1">
+  <h1 class="titulo">Oi minha linda ✨</h1>
+  <p class="subtitulo">Uma perguntinha importante pra te fazer... 💭</p>
+  <h2 class="pergunta">Vamos ter um  date amanhã?</h2>
+  <div class="botoes">
+    <button class="btn btn-sim" id="btnSim" onclick="dizerSim()">Sim 💕</button>
+    <button class="btn btn-nao" id="btnNao" onclick="clicarNao()">Não 😔</button>
+  </div>
+  <div class="tentativas" id="tentativas"></div>
+</div>
+
+<!-- TELA 2: Escolha do date -->
+<div class="tela" id="tela2">
+  <h1 class="escolhas-titulo">Ótimo! Sabia que você ia aceitar 😏</h1>
+  <p class="escolhas-sub">Agora, qual das te agrada mais?</p>
+  <div class="opcoes" id="opcoes">
+    <div class="opcao" data-id="restaurante" onclick="selecionar(this)">
+      <span class="opcao-emoji">🍷</span>
+      <div class="opcao-titulo">Restaurante</div>
+      <div class="opcao-desc">Jantar com um bom vinho e comida gostosa</div>
+    </div>
+    <div class="opcao" data-id="pizza" onclick="selecionar(this)">
+      <span class="opcao-emoji">🍕</span>
+      <div class="opcao-titulo">Pizza</div>
+      <div class="opcao-desc">Uma boa pizza com uma coquinha zero gelada pra equilibrar</div>
+    </div>
+    <div class="opcao" data-id="massa" onclick="selecionar(this)">
+      <span class="opcao-emoji">🍝</span>
+      <div class="opcao-titulo">Massa</div>
+      <div class="opcao-desc">Aquele nhoque que você gosta 😉 <br> E obviamente junto com uma bela garrada de vinho. </div>
+    </div>
+    <div class="opcao" data-id="casa" onclick="selecionar(this)">
+      <span class="opcao-emoji">🏠</span>
+      <div class="opcao-titulo">Em casa</div>
+      <div class="opcao-desc">Vinho, série(do aeroporto, ou qualquer outra) e eu 😎</div>
+    </div>
+  </div>
+  <button class="btn btn-confirmar" id="btnConfirmar" onclick="confirmar()">Confirmar escolha ✨</button>
+</div>
+
+<!-- TELA FINAL -->
+<div class="tela" id="tela3">
+  <div class="final">
+    <h1 class="final-titulo">Combinado! 💘</h1>
+    <div class="final-arte">💑</div>
+    <div class="final-msg">
+      <p id="msgFinal"></p>
+      <p style="margin-top:15px;">Já tô ansioso pra te ver. <br> (e com a roupa de tirar)</p>
+      <div class="assinatura">— com carinho ❤️</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Detectar se é dispositivo touch =====
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+  // ===== Frases divertidas =====
+  const frasesDesktop = [
+    'Vai, clica no Sim 🥺',
+    'Tá quase, vai... 💕',
+    'Olha como ele é difícil de pegar 😂',
+    'Sério, só tem uma opção certa aqui',
+    'Esse botão tem vida própria!',
+    'Desiste, ele não quer ser clicado 😅',
+    'O Sim tá ali ó, olha que lindo ele 💖'
+  ];
+
+  const frasesMobile = [
+    '🤔',
+    'Olha o Sim ficando enorme... 👀',
+    'Esse Não tá sumindo, hein 😅',
+    'Vai, clica no Sim 🥺',
+    'Quase invisível, esse Não!',
+    '💖',
+    '😂'
+  ];
+
+  const btnNao = document.getElementById('btnNao');
+  const btnSim = document.getElementById('btnSim');
+  const tentativasEl = document.getElementById('tentativas');
+  let tentativas = 0;
+
+  // ===== DESKTOP: Botão foge do mouse =====
+  if (!isTouchDevice) {
+    btnNao.addEventListener('mouseover', fugir);
+  }
+
+  function fugir() {
+    const maxX = window.innerWidth - btnNao.offsetWidth - 40;
+    const maxY = window.innerHeight - btnNao.offsetHeight - 40;
+    const novoX = Math.random() * maxX;
+    const novoY = Math.random() * maxY;
+
+    btnNao.style.position = 'fixed';
+    btnNao.style.left = novoX + 'px';
+    btnNao.style.top = novoY + 'px';
+    btnNao.style.transform = `rotate(${(Math.random()-0.5)*30}deg)`;
+
+    tentativas++;
+    mostrarFrase(frasesDesktop);
+
+    if (tentativas > frasesDesktop.length) {
+      const escala = Math.max(0.3, 1 - (tentativas - frasesDesktop.length) * 0.1);
+      btnNao.style.transform += ` scale(${escala})`;
+    }
+  }
+
+  // ===== MOBILE: Botão encolhe ao tocar, Sim cresce =====
+  function clicarNao() {
+    if (!isTouchDevice) {
+      // No desktop, se conseguir clicar de alguma forma, foge mesmo assim
+      fugir();
+      return;
+    }
+
+    tentativas++;
+    mostrarFrase(frasesMobile);
+
+    // Encolhe o Não progressivamente
+    const escala = Math.max(0.15, 1 - tentativas * 0.18);
+    const opacidade = Math.max(0.3, 1 - tentativas * 0.12);
+    btnNao.style.transform = `scale(${escala}) rotate(${(Math.random()-0.5)*20}deg)`;
+    btnNao.style.opacity = opacidade;
+
+    // Sim cresce e dança
+    const escalaSim = Math.min(1.6, 1 + tentativas * 0.12);
+    btnSim.style.transform = `scale(${escalaSim})`;
+    btnSim.style.boxShadow = `0 ${6 + tentativas*2}px 0 rgba(0,0,0,0.15), 0 ${10 + tentativas*3}px ${20 + tentativas*4}px rgba(255,107,157,${Math.min(0.7, 0.3 + tentativas*0.05)})`;
+
+    // Depois de muitas tentativas, redireciona pro sim
+    if (tentativas >= 6) {
+      setTimeout(() => {
+        tentativasEl.textContent = 'Ok, ok, eu interpreto isso como um Sim 😄';
+        tentativasEl.classList.add('aparece');
+      }, 200);
+      setTimeout(dizerSim, 1500);
+    }
+  }
+
+  function mostrarFrase(lista) {
+    const idx = Math.min(tentativas - 1, lista.length - 1);
+    tentativasEl.textContent = lista[idx];
+    tentativasEl.classList.add('aparece');
+  }
+
+  // ===== Coraçõezinhos =====
+  function soltarCoracao() {
+    const c = document.createElement('div');
+    c.className = 'coracao';
+    c.textContent = ['💕','💖','💗','❤️','💝'][Math.floor(Math.random()*5)];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.bottom = '0';
+    c.style.animationDuration = (3 + Math.random()*3) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 7000);
+  }
+  setInterval(soltarCoracao, 800);
+
+  // ===== Transição Tela 1 -> Tela 2 =====
+  function dizerSim() {
+    for (let i = 0; i < 60; i++) {
+      setTimeout(criarConfete, i * 30);
+    }
+    setTimeout(() => {
+      document.getElementById('tela1').classList.remove('ativa');
+      document.getElementById('tela2').classList.add('ativa');
+      tentativasEl.classList.remove('aparece');
+    }, 600);
+  }
+
+  function criarConfete() {
+    const cores = ['#ff6b9d', '#ffd93d', '#c5a3ff', '#ffc4d8', '#c2185b'];
+    const c = document.createElement('div');
+    c.className = 'confete';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = cores[Math.floor(Math.random()*cores.length)];
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    c.style.animationDuration = (2 + Math.random()*2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+
+  // ===== TELA 2: Escolhas =====
+  let escolhasSelecionadas = new Set();
+
+  function selecionar(el) {
+    const id = el.dataset.id;
+    if (escolhasSelecionadas.has(id)) {
+      escolhasSelecionadas.delete(id);
+      el.classList.remove('selecionada');
+    } else {
+      escolhasSelecionadas.add(id);
+      el.classList.add('selecionada');
+    }
+    const btn = document.getElementById('btnConfirmar');
+    if (escolhasSelecionadas.size > 0) {
+      btn.classList.add('habilitado');
+    } else {
+      btn.classList.remove('habilitado');
+    }
+  }
+
+  // ===== Transição Tela 2 -> Tela 3 =====
+  const mensagensFinais = {
+    restaurante: 'Muito bom, agora eu escolho! Vinho, luz baixa e eu tentando não derrubar metade da taça em cima de mim. ✨',
+    pizza: 'Aprovadíssimo! Só não vale pedir de peperone pois vou querer um pedaço da sua.',
+    massa: 'Massa italiana?! Vou querer provar o nhoque que você vai pedir. 💞',
+    casa: 'Vinho, comidinha boa, minhas playlists aleatórias e zero pressa pra noite acabar. 🍷'
+  };
+
+  function confirmar() {
+    let msg = '';
+    if (escolhasSelecionadas.size === 1) {
+      msg = mensagensFinais[[...escolhasSelecionadas][0]];
+    } else {
+      msg = `Tudo bem, a gente decide juntos depois então. 🍷💕`;
+    }
+    document.getElementById('msgFinal').textContent = msg;
+
+    for (let i = 0; i < 100; i++) {
+      setTimeout(criarConfete, i * 25);
+    }
+    setTimeout(() => {
+      document.getElementById('tela2').classList.remove('ativa');
+      document.getElementById('tela3').classList.add('ativa');
+    }, 600);
+  }
+</script>
+</body>
+</html>
